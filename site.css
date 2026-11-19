@@ -120,6 +120,13 @@ button[hidden], [hidden] { display: none !important; }
 .source-note { margin-top: 6px; font-size: 13px; }
 
 .reference-layout { display: grid; grid-template-columns: minmax(220px,.53fr) 1.47fr; gap: clamp(24px,4.5vw,78px); }
+.leaflet-link { color:var(--wine); text-decoration:underline; text-underline-offset:4px; }
+.premium-list { margin:0 0 2.5rem; scroll-margin-top:90px; }
+.premium-list h3 { font-size:1.35rem; margin:0 0 .8rem; }
+.premium-list dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr)); margin:0; gap:1.25rem; }
+.premium-list dl div { border-top:1px solid var(--line); padding-top:.8rem; }
+.premium-list dt { font-weight:650; }
+.premium-list dd { margin:.35rem 0 0; color:var(--muted); font-size:.92rem; }
 .reference-choices { border-top: 2px solid var(--ink); align-self: start; }
 .ref-choice { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 19px 4px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: white; font-size: clamp(18px,1.55vw,23px); letter-spacing: -.045em; }
 .ref-choice .ico { width: 16px; height: 16px; opacity: .35; }

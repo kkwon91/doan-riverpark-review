@@ -163,7 +163,7 @@
           <tbody>${tableRows()}</tbody>
         </table></div>
       </details>
-      <p class="ug-source">호실별 면적과 업종은 수정 리플렛 2쪽, 단지별 면적 합계와 상세 도면은 2026년 11월 17일 배포자료 기준입니다.</p>`;
+      <p class="ug-source">관리단 지정 이후 업종의 변동 가능성이 있습니다.<br>호실별 면적과 업종은 수정 리플렛 2쪽, 단지별 면적 합계와 상세 도면은 2026년 11월 17일 배포자료 기준입니다.</p>`;
     selectRoom(roomIndex);
   }
 

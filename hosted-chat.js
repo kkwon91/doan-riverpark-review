@@ -96,6 +96,8 @@
   // END GENERATED REFERENCE
 
   const bySource = new Map(data.sources.map(row => [row.id, row]));
+  const managementNote = '관리단 지정 이후 업종의 변동 가능성이 있습니다.';
+  bySource.set('review-management', { document: '회의 반영 리플렛', page: 2, title: '업종 안내', text: managementNote });
   const complexes = new Map(data.complexes.map(row => [row.complex, row]));
   const zoneNumbers = [...complexes.keys()];
   const rooms = data.rooms.map(([zone, wing, number, exclusive, contract, trade, exclusivePy, contractPy]) => ({
@@ -255,13 +257,14 @@
     messages = messages.slice(-9);
     if (messages.some(m => !m || typeof m.content !== 'string')) return reply('질문을 확인해 주세요.', [], 'clarification');
     const q = compact(messages[messages.length - 1].content.slice(0, 2000));
+    if (q.includes('관리단') || /업종.*(바뀌|바뀔|변경|변동|고정|바꿀)/.test(q)) return reply(managementNote + ' 개별 호실의 현재 지정 업종은 분양 문의처에서 확인해 주세요.', ['review-management']);
     const intent = classify(q);
     const {zones, wing, numbers} = scope(messages);
     if (zones.some(z => !complexes.has(z))) return reply('이번 상가 분양 자료의 대상은 1·2·3·5단지입니다. 어느 단지를 확인할까요?', ['brief-overview'], 'clarification');
     const rows = rooms.filter(r => (!zones.length || zones.includes(r.zone)) && (!wing || r.wing === wing));
     if (wing && !rows.length) return reply('선택한 단지에는 해당 동이 표시되어 있지 않습니다. 배치도의 단지와 동 표기를 확인해 주세요.', ['brief-overview'], 'clarification');
     const sectors = trades.filter(([, regex]) => regex.test(q)).map(([name]) => name);
-    const ratio = /호실당|호당|배후|세대당|101세대|100세대|한호실당/.test(q) || intent === 'ratio';
+    const ratio = /101[:대]1|호실당|호당|배후|세대당|101세대|100세대|한호실당/.test(q) || intent === 'ratio';
     const area = areaPattern.test(q);
     const price = pricePattern.test(q) || (intent === 'price' && !area);
     const stock = stockPattern.test(q) || intent === 'stock';
