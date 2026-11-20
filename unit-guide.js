@@ -64,7 +64,7 @@
     const [width,height] = media.size;
     const [x,y,w,h,start,end] = part || [0,0,width,height,0,current.rooms.length];
     const rooms = current.rooms.slice(start,end);
-    const indexTag = entry => `${entry.number}호 · 전용 ${area(entry.exclusiveM2)} · ${entry.designatedUse || '비지정'}`;
+    const indexTag = entry => `${entry.number}호 · ${entry.designatedUse || '비지정'}`;
     const floors = rooms.map((entry,i) => {
       const index = start+i;
       return `<path class="ug-floor ug-tone-${category(entry)}" d="${entry.vector.path}" data-ug-room="${index}" tabindex="${index === roomIndex ? 0 : -1}" role="button" aria-pressed="${index === roomIndex}" aria-label="${buildingName(current.building)}${entry.number}호 선택"><title>${indexTag(entry)}</title></path>`;
@@ -126,8 +126,6 @@
           <div class="ug-unit-head"><label class="ug-field-label" for="ug-select">호실 선택</label>
           <div class="ug-select-wrap"><select id="ug-select" class="ug-select">${options}</select>${icon('chevron')}</div></div>
           <dl class="ug-unit-facts">
-            <div><dt>전용면적</dt><dd data-ug-value="exclusive"></dd></div>
-            <div><dt>계약면적</dt><dd data-ug-value="contract"></dd></div>
             <div><dt>리플렛 표기 업종</dt><dd data-ug-value="use"></dd></div>
           </dl>
           <button type="button" class="ug-ask" data-ug-action="ask">${icon('chat')}이 호실 AI 상담</button>
@@ -149,8 +147,6 @@
     const picked = room();
     const select = first('#ug-select');
     select.value = String(index);
-    first('[data-ug-value="exclusive"]').textContent = area(picked.exclusiveM2);
-    first('[data-ug-value="contract"]').textContent = area(picked.contractM2);
     first('[data-ug-value="use"]').textContent = picked.designatedUse || '비지정';
     all('[data-ug-room]').forEach(shape => {
       const active = Number(shape.dataset.ugRoom) === index;
@@ -173,8 +169,7 @@
         scroller.scrollLeft += (bounds.left + bounds.right - frame.left - frame.right) / 2;
       }
     }
-    const description = roomName() + ' · 전용 ' + area(picked.exclusiveM2);
-    first('.ug-announcement').textContent = complex().complex + '단지 ' + description + ', 계약 ' + area(picked.contractM2);
+    first('.ug-announcement').textContent = complex().complex + '단지 ' + roomName() + ' · ' + (picked.designatedUse || '비지정');
   }
 
   function activateComplex(index, block = 0, unit = 0) {
