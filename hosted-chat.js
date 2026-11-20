@@ -118,7 +118,7 @@
   const trades = [
     ['편의점', /편의점|씨유|세븐일레븐|gs25/], ['카페', /카페|커피|까페/], ['호프', /치킨|호프|치맥|맥주/],
     ['부동산', /부동산|중개사|공인중개/], ['베이커리', /베이커리|빵집|제과|빵가게/], ['마트', /대형마트|마트|슈퍼|수퍼/],
-    ['정육', /정육|청과|수산|과일|생선/], ['비지정', /비지정|미지정|지정되지|지정안된/]
+    ['정육', /정육|청과|수산|과일|생선/], ['비지정', /비지정|미지정|지정되지|지정안된|정해진업종없|업종이?없는|업종.{0,3}정해지지/]
   ];
 
   function features(raw) {
@@ -233,7 +233,7 @@
       if (!matches.length) return reply(`해당 범위의 호실표에서 요청하신 업종을 찾을 수 없습니다. 입점 가능 여부는 분양 문의 ${phone}에서 확인해 주세요.`, [...rows.map(r => r.source), 'leaf-contact'], 'not_found');
       const groups = new Map();
       for (const r of matches) {
-        const name = `${location(r)}|${r.trade || '비지정'}`;
+        const name = `${location(r)}|${r.trade || '정해진 업종 없음'}`;
         if (!groups.has(name)) groups.set(name, []);
         groups.get(name).push(r.number);
       }
@@ -241,15 +241,15 @@
         const [place, use] = group.split('|');
         return `${place} ${numbers.join('·')}호 · ${use}`;
       });
-      const note = matches.some(r => (r.trade || '').includes('일괄')) ? '‘일괄’은 리플렛의 표기입니다. 세부 계약 조건은 분양 문의처에서 확인해 주세요.' : '실제 입점 여부는 분양 문의처에서 확인해 주세요.';
-      return reply(`수정 리플렛의 호실표에서 ${matches.length}개 호실을 찾았습니다.\n${lines.join('\n')}\n${note}`, matches.map(r => r.source));
+      const note = matches.some(r => (r.trade || '').includes('일괄')) ? '여러 호실이 ‘일괄’로 표시된 경우, 함께 계약하는 조건은 분양 문의처에 확인해 주세요.' : '실제 입점 여부는 분양 문의처에서 확인해 주세요.';
+      return reply(`분양 자료에서 해당하는 호실 ${matches.length}개를 찾았습니다.\n${lines.join('\n')}\n${note}`, matches.map(r => r.source));
     }
     if (query.includes('추천')) {
       const keys = unique(rows.map(r => `brief-${r.zone}-recommendations`)).filter(k => bySource.has(k));
       if (keys.length) return reply(keys.map(k => bySource.get(k).text).join('\n'), keys);
     }
     const list = unique(rows.filter(r => r.trade).map(r => r.trade.replace('(일괄)', ''))).join(', ');
-    return reply(`호실표에 표기된 업종은 ${list} 등입니다. ${rows.some(r => !r.trade) ? '비지정 호실도 있습니다. ' : ''}찾으시는 업종이나 호실 번호를 알려 주세요.`, rows.map(r => r.source));
+    return reply(`입점 업종은 ${list} 등입니다. ${rows.some(r => !r.trade) ? '아직 업종이 정해지지 않은 호실도 있습니다. ' : ''}찾으시는 업종이나 호실 번호를 알려 주세요.`, rows.map(r => r.source));
   }
 
   function answer(messages) {
@@ -289,7 +289,7 @@
         const wantPy = /몇평|평수|평으로/.test(q);
         const ex = `전용 ${r.exclusive.toFixed(4)}㎡${wantPy ? `(${r.exclusivePy}평)` : ''}`;
         const ct = `계약 ${r.contract.toFixed(4)}㎡${wantPy ? `(${r.contractPy}평)` : ''}`;
-        return `${location(r)} ${r.number}호는 ${ex}, ${ct}입니다. 호실표의 업종은 ${r.trade || '비지정'}입니다.`;
+        return `${location(r)} ${r.number}호는 ${ex}, ${ct}입니다. ${r.trade ? '입점 업종은 ' + r.trade + '입니다.' : '아직 정해진 입점 업종이 없습니다.'}`;
       });
       result = reply(lines.join('\n'), matches.map(r => r.source));
     }
@@ -302,7 +302,7 @@
     if (contact) {
       if (/현장|상가주소|단지주소/.test(q) && !/모델하우스|견본주택|홍보관/.test(q)) return reply(`리플렛에 안내된 ${address}은 모델하우스 주소입니다. 상가 지번은 분양 문의 ${phone}에서 확인해 주세요.`, ['leaf-contact']);
       let line = /전화|연락|문의처|번호/.test(q) && !/주소|위치|방문|모델하우스/.test(q) ? `분양 문의 전화는 ${phone}입니다.` : `모델하우스 주소는 ${address}입니다. 분양 문의 전화는 ${phone}입니다.`;
-      if (/시간|휴무|예약|영업일|몇시|주말/.test(q)) line += ' 운영 시간과 예약 방법은 리플렛에 기재되어 있지 않아 방문 전 전화로 확인해 주세요.';
+      if (/시간|휴무|예약|영업일|몇시|주말/.test(q)) line += ' 운영 시간과 예약 방법은 분양 자료에 없어 방문 전 전화로 확인해 주세요.';
       return reply(line, ['leaf-contact']);
     }
     if (sectors.length || intent === 'industry' || q.includes('업종')) return sectorAnswer(rows, q, sectors);

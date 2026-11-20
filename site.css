@@ -311,5 +311,22 @@ dialog::backdrop { background: rgba(20,30,25,.38); }
   .ratio-number { animation:ratio-arrive .5s cubic-bezier(.19,.72,.28,1) both; }
   @keyframes ratio-arrive { from { opacity:.6; transform:translateY(.07em); } to { opacity:1; transform:translateY(0); } }
 }
+@media screen and (prefers-reduced-motion:no-preference) and (forced-colors:none) {
+  @supports ((background-clip:text) or (-webkit-background-clip:text)) {
+    .ratio-number {
+      background-image:linear-gradient(110deg, #fff8ef 40%, #ffe0a7 45%, #fff 49%, #fff 51%, #ffdfa5 54%, #fff8ef 60%);
+      background-size:300% 100%;
+      background-repeat:no-repeat;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:ratio-arrive .5s cubic-bezier(.19,.72,.28,1) both, ratio-shine 5s linear .55s infinite backwards;
+    }
+    @keyframes ratio-shine {
+      0% { background-position:100% 50%; }
+      25%, 100% { background-position:0% 50%; }
+    }
+  }
+}
 .ratio-title { font-size:clamp(27px,2.7vw,46px); line-height:1.2; font-weight:590; letter-spacing:-.05em; }
 .ratio-detail { margin-top:clamp(12px,1.4vw,22px); color:#f3e7ea; font-size:clamp(15px,1.15vw,19px); line-height:1.55; }

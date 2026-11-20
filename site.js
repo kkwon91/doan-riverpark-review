@@ -51,9 +51,9 @@
   document.querySelector('#hero-next').addEventListener('click', () => setView(1));
 
   const resources = {
-    aerial: { title: '단지 조감도', note: '건축 계획을 표현한 CG입니다.', alt: '상공에서 내려다본 도안리버파크 주거동과 단지 주변' },
-    community: { title: '5BL 커뮤니티 평면도', note: '입주민이 이용하는 주거시설 참고 도면입니다.', alt: '5블록 공동주택에 계획된 입주민 커뮤니티 공간 배치' },
-    home: { title: '공동주택 84A 확장형', note: '아파트 세대 내부를 보여 주는 참고 도면입니다.', alt: '공동주택 84A 확장형의 실내 공간 배치' },
+    aerial: { title: '단지 조감도', note: '완공 후 모습을 예상해 그린 그림입니다.', alt: '상공에서 내려다본 도안리버파크 주거동과 단지 주변' },
+    community: { title: '5블록 주민공동시설 배치도', note: '입주민이 함께 쓰는 시설의 배치입니다.', alt: '5블록 공동주택에 계획된 입주민 커뮤니티 공간 배치' },
+    home: { title: '공동주택 84A 확장형', note: '아파트 안의 방과 거실 배치를 보여 줍니다.', alt: '공동주택 84A 확장형의 실내 공간 배치' },
   };
   const choices = [...document.querySelectorAll('.ref-choice')];
   const referenceImage = document.querySelector('#reference-image');

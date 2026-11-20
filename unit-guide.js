@@ -39,7 +39,7 @@
   window.doanReviewContext = () => explicitSelection && complexes ? {plan:plan().key, room:room().number} : null;
 
   const categories = {
-    dining: '식음료', retail: '판매', office: '부동산', open: '비지정'
+    dining: '식음료', retail: '판매', office: '부동산', open: '정해진 업종 없음'
   };
   function category(entry) {
     if (!entry.designatedUse) return 'open';
@@ -50,7 +50,7 @@
   function legend() {
     return [...new Set(plan().rooms.map(category))].map(key =>
       `<span><i class="ug-swatch ug-tone-${key}"></i>${categories[key]}</span>`
-    ).join('') + '<span><i class="ug-swatch ug-swatch-picked"></i>선택 호실</span>';
+    ).join('') + '<span><i class="ug-swatch ug-swatch-picked"></i>선택한 호실</span>';
   }
   // The leaflet depicts these wings separately. Stack their original extents
   // on phones so each bay remains legible without rearranging adjoining shops.
@@ -64,7 +64,7 @@
     const [width,height] = media.size;
     const [x,y,w,h,start,end] = part || [0,0,width,height,0,current.rooms.length];
     const rooms = current.rooms.slice(start,end);
-    const indexTag = entry => `${entry.number}호 · ${entry.designatedUse || '비지정'}`;
+    const indexTag = entry => `${entry.number}호 · ${entry.designatedUse || '정해진 업종 없음'}`;
     const floors = rooms.map((entry,i) => {
       const index = start+i;
       return `<path class="ug-floor ug-tone-${category(entry)}" d="${entry.vector.path}" data-ug-room="${index}" tabindex="${index === roomIndex ? 0 : -1}" role="button" aria-pressed="${index === roomIndex}" aria-label="${buildingName(current.building)}${entry.number}호 선택"><title>${indexTag(entry)}</title></path>`;
@@ -90,7 +90,7 @@
   function tableRows() {
     return complex().plans.map((block, blockIndex) => block.rooms.map((entry, entryIndex) =>
       `<tr><th scope="row"><button type="button" class="ug-table-room" data-ug-table-plan="${blockIndex}" data-ug-table-room="${entryIndex}">${buildingName(block.building)}${entry.number}호</button></th>
-        <td>${formatArea.format(entry.exclusiveM2)}</td><td>${formatArea.format(entry.contractM2)}</td><td>${entry.designatedUse || '비지정'}</td></tr>`
+        <td>${formatArea.format(entry.exclusiveM2)}</td><td>${formatArea.format(entry.contractM2)}</td><td>${entry.designatedUse || '정해진 업종 없음'}</td></tr>`
     ).join('')).join('');
   }
 
@@ -108,8 +108,8 @@
       <dl class="ug-complex-facts" aria-label="${item.complex}단지 규모">
         <div><dt>공동주택</dt><dd>${count(item.households)}세대</dd></div>
         <div><dt>상가</dt><dd>${item.buildingCount}개동 · ${item.unitCount}호실</dd></div>
-        <div><dt>전용 합계</dt><dd>${area(item.exclusiveM2)}</dd></div>
-        <div><dt>계약 합계</dt><dd>${area(item.contractM2)}</dd></div>
+        <div><dt>전체 전용면적</dt><dd>${area(item.exclusiveM2)}</dd></div>
+        <div><dt>전체 계약면적</dt><dd>${area(item.contractM2)}</dd></div>
       </dl>
       <div class="ug-workspace">
         <figure class="ug-figure">
@@ -120,21 +120,21 @@
             </div>
           </div>
           <div class="ug-stage">${guideStage()}</div>
-          <figcaption class="ug-caption"><div class="ug-legend" aria-label="업종 범례">${legend()}</div></figcaption>
+          <figcaption class="ug-caption"><div class="ug-legend" aria-label="색깔별 업종 안내">${legend()}</div></figcaption>
         </figure>
         <div class="ug-unit" aria-label="선택한 호실 정보">
           <div class="ug-unit-head"><label class="ug-field-label" for="ug-select">호실 선택</label>
           <div class="ug-select-wrap"><select id="ug-select" class="ug-select">${options}</select>${icon('chevron')}</div></div>
           <dl class="ug-unit-facts">
-            <div><dt>리플렛 표기 업종</dt><dd data-ug-value="use"></dd></div>
+            <div><dt>입점 업종</dt><dd data-ug-value="use"></dd></div>
           </dl>
           <button type="button" class="ug-ask" data-ug-action="ask">${icon('chat')}이 호실 AI 상담</button>
         </div>
       </div>
       <details class="ug-table-wrap">
         <summary><span>${item.complex}단지 호실별 면적표</span>${icon('plus')}</summary>
-        <div class="ug-table-scroll"><table class="ug-table"><caption class="ug-sr">${item.complex}단지 전체 ${item.unitCount}개 호실의 면적과 리플렛 표기 업종</caption>
-          <thead><tr><th scope="col">호실</th><th scope="col">전용면적 <small>(㎡)</small></th><th scope="col">계약면적 <small>(㎡)</small></th><th scope="col">표기 업종</th></tr></thead>
+        <div class="ug-table-scroll"><table class="ug-table"><caption class="ug-sr">${item.complex}단지 전체 ${item.unitCount}개 호실의 면적과 입점 업종</caption>
+          <thead><tr><th scope="col">호실</th><th scope="col">전용면적 <small>(㎡)</small></th><th scope="col">계약면적 <small>(㎡)</small></th><th scope="col">입점 업종</th></tr></thead>
           <tbody>${tableRows()}</tbody>
         </table></div>
       </details>
@@ -147,7 +147,7 @@
     const picked = room();
     const select = first('#ug-select');
     select.value = String(index);
-    first('[data-ug-value="use"]').textContent = picked.designatedUse || '비지정';
+    first('[data-ug-value="use"]').textContent = picked.designatedUse || '정해진 업종 없음';
     all('[data-ug-room]').forEach(shape => {
       const active = Number(shape.dataset.ugRoom) === index;
       shape.setAttribute('aria-pressed', String(active));
@@ -169,7 +169,7 @@
         scroller.scrollLeft += (bounds.left + bounds.right - frame.left - frame.right) / 2;
       }
     }
-    first('.ug-announcement').textContent = complex().complex + '단지 ' + roomName() + ' · ' + (picked.designatedUse || '비지정');
+    first('.ug-announcement').textContent = complex().complex + '단지 ' + roomName() + ' · ' + (picked.designatedUse || '정해진 업종 없음');
   }
 
   function activateComplex(index, block = 0, unit = 0) {
