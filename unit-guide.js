@@ -16,12 +16,9 @@
   const all = selector => root.querySelectorAll(selector);
 
   const icons = {
-    expand: '<path d="M8 3H3v5m9-5h5v5M3 12v5h5m9-5v5h-5"/>',
     chat: '<path d="M3 3.5h14v10H9l-4.7 3v-3H3z"/>',
     plus: '<path d="M10 4v12M4 10h12"/>',
-    minus: '<path d="M4 10h12"/>',
     chevron: '<path d="m5 8 5 5 5-5"/>',
-    close: '<path d="m4 4 12 12m0-12L4 16"/>'
   };
   function icon(name) {
     return '<svg class="ug-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + icons[name] + '</svg>';
@@ -32,8 +29,6 @@
   let planIndex = 0;
   let roomIndex = 0;
   let explicitSelection = false;
-  let modalDrawing = 'guide';
-  let zoom = 1;
   const compactScreen = window.matchMedia('(max-width: 690px)');
   const complex = () => complexes[complexIndex];
   const plan = () => complex().plans[planIndex];
@@ -57,14 +52,13 @@
       `<span><i class="ug-swatch ug-tone-${key}"></i>${categories[key]}</span>`
     ).join('') + '<span><i class="ug-swatch ug-swatch-picked"></i>선택 호실</span>';
   }
-  const smallAreas = new Intl.NumberFormat('ko-KR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   // The leaflet depicts these wings separately. Stack their original extents
   // on phones so each bay remains legible without rearranging adjoining shops.
   const splitViews = {
     '1': [[0, 0, 404, 237, 0, 6], [416, 68, 404, 175, 6, 12]],
     '3a': [[0, 0, 413, 169, 0, 4], [415, 0, 405, 169, 4, 8]]
   };
-  function vectorPlan(part, insideDialog = false) {
+  function vectorPlan(part) {
     const current = plan();
     const media = current.drawings.guide;
     const [width,height] = media.size;
@@ -77,10 +71,9 @@
     }).join('');
     const tags = rooms.map((entry,i) => {
       const [lx,ly] = entry.vector.label;
-      const gap = ['2a','2b','3b'].includes(current.key) ? 22 : 17;
-      return `<g class="ug-room-label" data-label-room="${start+i}" data-selected="${start+i===roomIndex}" transform="translate(${lx} ${ly})"><text y="-1" class="ug-number">${entry.number}</text><text y="${gap}" class="ug-label-area">${smallAreas.format(entry.exclusiveM2)}</text></g>`;
+      return `<g class="ug-room-label" data-label-room="${start+i}" data-selected="${start+i===roomIndex}" transform="translate(${lx} ${ly})"><text dominant-baseline="central" class="ug-number">${entry.number}</text></g>`;
     }).join('');
-    return `<svg class="ug-drawing ug-key-${current.key}${insideDialog ? ' ug-large-map' : ''}" viewBox="${x} ${y} ${w} ${h}" role="group" aria-label="${planName()} ${rooms[0].number}호부터 ${rooms.at(-1).number}호까지의 안내 배치도">${floors}<image class="ug-wallwork" href="${planAsset(media.file)}" width="${width}" height="${height}" aria-hidden="true"/><g class="ug-lettering" aria-hidden="true">${tags}</g></svg>`;
+    return `<svg class="ug-drawing ug-key-${current.key}" viewBox="${x} ${y} ${w} ${h}" role="group" aria-label="${planName()} ${rooms[0].number}호부터 ${rooms.at(-1).number}호까지의 안내 배치도">${floors}<image class="ug-wallwork" href="${planAsset(media.file)}" width="${width}" height="${height}" aria-hidden="true"/><path class="ug-picked-edge" aria-hidden="true"/><g class="ug-lettering" aria-hidden="true">${tags}</g></svg>`;
   }
   function guideStage() {
     const key = plan().key;
@@ -88,25 +81,10 @@
     const art = split ? split.map(part=>vectorPlan(part)).join('') : vectorPlan();
     const openingSide = complex().complex === 2 ? 'above' : 'below';
     return `<div class="ug-board ${split ? 'ug-stacked' : ''} ug-road-${openingSide}" data-plan="${key}">
-      <div class="ug-board-key"><span>호실 번호</span><span>전용면적 (㎡)</span>${split ? '<span class="ug-split-note">좌·우 구간을 위아래로 표시</span>' : ''}</div>
+      <div class="ug-board-key"><span>호실 번호</span>${split ? '<span class="ug-split-note">좌·우 구간을 위아래로 표시</span>' : ''}</div>
       <div class="ug-board-scroll"><div class="ug-board-art">${art}</div></div>
       <div class="ug-street"><span>${openingSide === 'above' ? '↑' : '↓'} 대로변 방향</span></div>
     </div>`;
-  }
-
-  function mapMarkup(drawing, insideDialog) {
-    if (drawing === 'guide') return vectorPlan(null, insideDialog);
-    const current = plan();
-    const media = current.drawings[drawing];
-    const [width, height] = media.size;
-    const shape = current.rooms.map((entry, index) => {
-      const chosen = index === roomIndex;
-      return `<polygon class="ug-room-shape" data-ug-room="${index}" role="button" aria-label="${buildingName(current.building)}${entry.number}호 선택" aria-pressed="${chosen}" tabindex="${chosen ? '0' : '-1'}" vector-effect="non-scaling-stroke" points="${entry.areas[drawing]}"><title>${entry.number}호 · 전용 ${area(entry.exclusiveM2)}</title></polygon>`;
-    }).join('');
-    return `<svg class="ug-map${insideDialog ? ' ug-large-map' : ''}" role="group" aria-label="${planName()} 호실 배치도" viewBox="0 0 ${width} ${height}">
-      <image href="${planAsset(media.file)}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="none"/>
-      ${shape}
-    </svg>`;
   }
 
   function tableRows() {
@@ -140,10 +118,9 @@
             <div class="ug-figure-title"><h3 tabindex="-1">${planName()} 배치도</h3>
               ${item.plans.length > 1 ? `<div class="ug-buildings" role="group" aria-label="상가 동 선택">${blocks}</div>` : ''}
             </div>
-            <button type="button" class="ug-expand" data-ug-action="open" aria-haspopup="dialog">${icon('expand')}크게 보기</button>
           </div>
           <div class="ug-stage">${guideStage()}</div>
-          <figcaption class="ug-caption"><div class="ug-legend" aria-label="업종 범례">${legend()}</div><span>표시 면적은 ㎡ 단위로 소수 둘째 자리까지 반올림했습니다.</span></figcaption>
+          <figcaption class="ug-caption"><div class="ug-legend" aria-label="업종 범례">${legend()}</div></figcaption>
         </figure>
         <div class="ug-unit" aria-label="선택한 호실 정보">
           <div class="ug-unit-head"><label class="ug-field-label" for="ug-select">호실 선택</label>
@@ -180,6 +157,10 @@
       shape.setAttribute('aria-pressed', String(active));
       shape.setAttribute('tabindex', active ? '0' : '-1');
     });
+    all('.ug-drawing').forEach(svg => {
+      const selected = svg.querySelector('.ug-floor[aria-pressed="true"]');
+      svg.querySelector('.ug-picked-edge').setAttribute('d', selected?.getAttribute('d') || '');
+    });
     all('[data-label-room]').forEach(label => {
       label.dataset.selected = String(Number(label.dataset.labelRoom) === index);
     });
@@ -193,8 +174,6 @@
       }
     }
     const description = roomName() + ' · 전용 ' + area(picked.exclusiveM2);
-    const modalSelection = first('.ug-modal-selection');
-    if (modalSelection) modalSelection.textContent = description;
     first('.ug-announcement').textContent = complex().complex + '단지 ' + description + ', 계약 ' + area(picked.contractM2);
   }
 
@@ -315,9 +294,8 @@
     const target = findAddress(new URL(link.getAttribute('href'), location.href));
     if (!target) return;
     event.preventDefault();
-    const origin = {place:link.dataset.dmPlace, expanded:!!link.closest('.dm-dialog'), list:!!link.closest('.dm-groups')};
+    const origin = {place:link.dataset.dmPlace, list:!!link.closest('.dm-groups')};
     writeHistory('replaceState', {...history.state, doanMapOrigin:origin}, mapUrl());
-    window.dispatchEvent(new CustomEvent('doan:leave-map'));
     explicitSelection = true;
     activateComplex(...target);
     writeHistory('pushState', {doanPlanFromMap:true}, pickedUrl());
@@ -333,54 +311,7 @@
     restoreMap({});
   }
 
-  function resizeModal(keepCenter) {
-    const dialog = first('.ug-dialog');
-    if (!dialog.open) return;
-    const frame = first('.ug-modal-scroll');
-    const box = first('.ug-modal-canvas');
-    const graphic = first('.ug-large-map');
-    const [width, height] = plan().drawings[modalDrawing].size;
-    const vw = frame.clientWidth;
-    const vh = frame.clientHeight;
-    const centerX = keepCenter ? (frame.scrollLeft + vw / 2) / Math.max(vw, box.offsetWidth) : 0.5;
-    const centerY = keepCenter ? (frame.scrollTop + vh / 2) / Math.max(vh, box.offsetHeight) : 0.5;
-    const factor = Math.min((vw - 32) / width, (vh - 32) / height) * zoom;
-    const newWidth = Math.max(1, Math.round(width * factor));
-    const newHeight = Math.max(1, Math.round(height * factor));
-    box.style.width = Math.max(vw, newWidth + 32) + 'px';
-    box.style.height = Math.max(vh, newHeight + 32) + 'px';
-    graphic.style.width = newWidth + 'px';
-    graphic.style.height = newHeight + 'px';
-    frame.scrollLeft = Math.round(centerX * box.offsetWidth - vw / 2);
-    frame.scrollTop = Math.round(centerY * box.offsetHeight - vh / 2);
-    first('[data-ug-action="zoom-out"]').disabled = zoom <= 1;
-    first('[data-ug-action="zoom-in"]').disabled = zoom >= 4;
-    first('.ug-zoom-readout').textContent = Math.round(zoom * 100) + '%';
-  }
-
-  function drawModal() {
-    all('[data-ug-drawing]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.ugDrawing === modalDrawing));
-    });
-    first('.ug-modal-canvas').innerHTML = mapMarkup(modalDrawing, true);
-    zoom = 1;
-    resizeModal(false);
-  }
-
-  function openModal() {
-    modalDrawing = 'guide';
-    first('#ug-modal-title').textContent = planName() + ' 배치도';
-    first('.ug-modal-selection').textContent = roomName() + ' · 전용 ' + area(room().exclusiveM2);
-    first('.ug-dialog').showModal();
-    document.body.classList.add('ug-dialog-open');
-    drawModal();
-  }
-
   const actions = {
-    open: openModal,
-    close: () => first('.ug-dialog').close(),
-    'zoom-in': () => { zoom = Math.min(4, zoom + 0.5); resizeModal(true); },
-    'zoom-out': () => { zoom = Math.max(1, zoom - 0.5); resizeModal(true); },
     ask: () => window.dispatchEvent(new CustomEvent('doan:ask', {
       detail: { question: complex().complex + '단지 ' + roomName() + '의 전용면적과 계약면적, 업종을 알려주세요.' }
     }))
@@ -389,9 +320,7 @@
   function wireControls() {
     document.addEventListener('click', onLocationLink);
     window.addEventListener('popstate', () => {
-      if (first('.ug-dialog').open) first('.ug-dialog').close();
       if (applyAddress()) {
-        window.dispatchEvent(new CustomEvent('doan:leave-map'));
         return;
       }
       explicitSelection = false;
@@ -420,10 +349,6 @@
         roomIndex = 0;
         renderPanel();
         first('[data-ug-building="' + planIndex + '"]').focus({ preventScroll: true });
-      }
-      if (data.ugDrawing) {
-        modalDrawing = data.ugDrawing;
-        drawModal();
       }
       if (data.ugTableRoom !== undefined) {
         planIndex = Number(data.ugTablePlan);
@@ -462,24 +387,11 @@
         first('[data-ug-complex="' + next + '"]').focus({ preventScroll: true });
       } else {
         selectRoom(next);
-        const container = target.closest('.ug-stage, .ug-modal-canvas');
+        const container = target.closest('.ug-stage');
         container.querySelector('[data-ug-room="' + next + '"]').focus({ preventScroll: true });
       }
       rememberChoice();
     });
-    const dialog = first('.ug-dialog');
-    dialog.addEventListener('close', () => {
-      document.body.classList.remove('ug-dialog-open');
-      first('.ug-modal-canvas').replaceChildren();
-      first('[data-ug-action="open"]').focus({ preventScroll: true });
-    });
-    dialog.addEventListener('click', event => {
-      if (event.target !== dialog) return;
-      const bounds = dialog.getBoundingClientRect();
-      if (event.clientX < bounds.left || event.clientX > bounds.right ||
-          event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
-    });
-    window.addEventListener('resize', () => { if (dialog.open) resizeModal(true); });
   }
 
   async function load() {
@@ -502,21 +414,7 @@
     root.innerHTML = `
       <div class="ug-tabs" role="tablist" aria-label="단지 선택">${tabs}</div>
       <div id="ug-panel" role="tabpanel"></div>
-      <span class="ug-sr ug-announcement" role="status" aria-live="polite"></span>
-      <dialog class="ug-dialog" aria-labelledby="ug-modal-title">
-        <div class="ug-dialog-head"><h3 id="ug-modal-title"></h3>
-          <button type="button" data-ug-action="close" class="ug-modal-close" aria-label="배치도 닫기" autofocus>${icon('close')}</button></div>
-        <div class="ug-modal-tools">
-          <div class="ug-drawings" role="group" aria-label="도면 종류">
-            <button type="button" data-ug-drawing="guide">안내도</button>
-            <button type="button" data-ug-drawing="simple">리플렛 배치도</button>
-            <button type="button" data-ug-drawing="detailed">상세 도면</button>
-          </div>
-          <div class="ug-zoom-tools"><button type="button" data-ug-action="zoom-out" aria-label="도면 축소">${icon('minus')}</button><output class="ug-zoom-readout">100%</output><button type="button" data-ug-action="zoom-in" aria-label="도면 확대">${icon('plus')}</button></div>
-        </div>
-        <div class="ug-modal-scroll" tabindex="0" aria-label="확대 도면 탐색"><div class="ug-modal-canvas"></div></div>
-        <p class="ug-modal-selection" aria-live="polite"></p>
-      </dialog>`;
+      <span class="ug-sr ug-announcement" role="status" aria-live="polite"></span>`;
     if (!applyAddress()) activateComplex(0);
     wireControls();
   }

@@ -4,8 +4,6 @@
   if (!figure) return;
   const ns = 'http://www.w3.org/2000/svg';
   const nav = figure.querySelector('.dm-groups');
-  const expand = figure.querySelector('.dm-expand');
-  const terrain = figure.querySelector('.dm-terrain');
   const list = figure.querySelector('.dm-location-list');
   const mobile = matchMedia('(max-width: 700px)');
   list.open = mobile.matches;
@@ -54,76 +52,14 @@
   }
 
   figure.querySelector('.dm-map').append(overlay());
-  const dialog = document.createElement('dialog');
-  dialog.className = 'dm-dialog';
-  dialog.setAttribute('aria-labelledby', 'dm-dialog-title');
-  dialog.innerHTML = `<header class="dm-dialog-head"><h2 id="dm-dialog-title">전체 상가 위치도</h2><button type="button" class="dm-close" aria-label="전체 위치도 닫기" autofocus>닫기</button></header>
-    <div class="dm-dialog-body"><div class="dm-map-column">
-      <div class="dm-scroller" tabindex="0" aria-label="상가 위치도 확대 및 이동"><div class="dm-large-board"><div class="dm-map"></div></div></div>
-      <div class="dm-zoom"><button type="button" data-dm-zoom="-1" aria-label="위치도 축소">−</button><output>100%</output><button type="button" data-dm-zoom="1" aria-label="위치도 확대">＋</button></div>
-    </div><div class="dm-side"><h3>상가 위치 목록</h3></div></div>`;
-  const largeMap = dialog.querySelector('.dm-map');
-  const largeImage = terrain.cloneNode(false);
-  largeImage.loading = 'eager';
-  largeMap.append(largeImage, overlay());
-  dialog.querySelector('.dm-side').append(nav.cloneNode(true));
-  figure.append(dialog);
-  expand.hidden = false;
-  const frame = dialog.querySelector('.dm-scroller');
-  const board = dialog.querySelector('.dm-large-board');
-  let zoom = 1;
-  function sizeMap(center = true) {
-    if (!dialog.open) return;
-    const w = frame.clientWidth, h = frame.clientHeight;
-    const x = center ? (frame.scrollLeft + w / 2) / Math.max(w, board.offsetWidth) : .5;
-    const y = center ? (frame.scrollTop + h / 2) / Math.max(h, board.offsetHeight) : .5;
-    const size = Math.max(1, Math.floor(Math.min(w, h) * zoom));
-    largeMap.style.width = size + 'px';
-    board.style.width = Math.max(w, size) + 'px';
-    board.style.height = Math.max(h, size) + 'px';
-    frame.scrollLeft = x * board.offsetWidth - w / 2;
-    frame.scrollTop = y * board.offsetHeight - h / 2;
-    dialog.querySelector('.dm-zoom output').textContent = Math.round(zoom * 100) + '%';
-    dialog.querySelector('[data-dm-zoom="-1"]').disabled = zoom === 1;
-    dialog.querySelector('[data-dm-zoom="1"]').disabled = zoom === 3;
-  }
-  function openMap() {
-    if (dialog.open) return;
-    zoom = 1;
-    dialog.showModal();
-    document.body.classList.add('dm-locked');
-    sizeMap(false);
-  }
-  expand.addEventListener('click', openMap);
-  dialog.querySelector('.dm-close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('close', () => document.body.classList.remove('dm-locked'));
-  dialog.addEventListener('click', event => {
-    const control = event.target.closest('[data-dm-zoom]');
-    if (control) {
-      zoom = Math.max(1, Math.min(3, zoom + .5 * Number(control.dataset.dmZoom)));
-      sizeMap();
-    }
-    if (event.target === dialog) {
-      const r = dialog.getBoundingClientRect();
-      if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close();
-    }
-  });
-  window.addEventListener('resize', () => sizeMap());
-  window.addEventListener('doan:leave-map', () => { if (dialog.open) dialog.close(); });
   window.addEventListener('doan:restore-map', event => {
-    const origin = event.detail || {};
+    const {place, list: useList} = event.detail || {};
     requestAnimationFrame(() => {
-      if (origin.expanded) openMap();
-      if (origin.list && !origin.expanded) list.open = true;
-      const scope = origin.expanded ? dialog : figure;
-      const where = origin.list ? '.dm-groups ' : '.dm-overlay ';
-      const valid = areas.some(entry => entry.id === origin.place);
-      const anchor = valid ? scope.querySelector(where + '[data-dm-place="' + origin.place + '"]') : expand;
-      if (!origin.expanded) {
-        const target = origin.list && anchor ? anchor : figure.querySelector('.dm-map');
-        target.scrollIntoView({block:'center', behavior:'instant'});
-      }
-      (anchor || expand).focus({preventScroll:true});
+      if (useList) list.open = true;
+      const scope = useList ? nav : figure.querySelector('.dm-overlay');
+      const link = [...scope.querySelectorAll('[data-dm-place]')].find(el => el.dataset.dmPlace === place);
+      (link || figure.querySelector('.dm-map')).scrollIntoView({block:'center', behavior:'instant'});
+      (link || scope.querySelector('a'))?.focus({preventScroll:true});
     });
   });
 })();

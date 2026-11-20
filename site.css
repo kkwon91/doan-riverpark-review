@@ -305,3 +305,8 @@ dialog::backdrop { background: rgba(20,30,25,.38); }
   .identity { gap: 7px; }
   .identity-name { padding-left: 7px; }
 }
+
+.hero h1.ratio-heading { display:grid; justify-items:start; gap:clamp(16px,1.5vw,24px); }
+.ratio-number { display:inline-block; padding:.04em .16em .10em; border:1px solid #f5dce3; font-size:clamp(68px,7.6vw,126px); line-height:1; font-weight:600; letter-spacing:-.055em; font-variant-numeric:lining-nums; }
+.ratio-title { font-size:clamp(27px,2.7vw,46px); line-height:1.2; font-weight:590; letter-spacing:-.05em; }
+.ratio-detail { margin-top:clamp(12px,1.4vw,22px); color:#f3e7ea; font-size:clamp(15px,1.15vw,19px); line-height:1.55; }

@@ -237,3 +237,8 @@
 @container (max-width: 463px) {
   .ug-board[data-plan="2a"] .ug-board-key::after { content: "좌우로 밀어 보기"; margin-left: auto; }
 }
+
+.ug-picked-edge { fill:none; stroke:#691b32; stroke-width:2.5px; stroke-linejoin:round; vector-effect:non-scaling-stroke; pointer-events:none; }
+#unit-guide .ug-floor:focus { outline: none; }
+.ug-floor { -webkit-tap-highlight-color: transparent; }
+.ug-drawing:has(.ug-floor:focus-visible) .ug-picked-edge { stroke:#201b1b; stroke-dasharray:5 2; }
