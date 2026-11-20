@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<title>상담 문의 관리 · 도안리버파크</title>
+<link rel="icon" href="../assets/site/mark.png">
+<link rel="stylesheet" href="admin.css?v=a9c921613a">
+<script defer src="admin.js?v=15074cf0cc"></script>
+</head>
+<body>
+<header class="mast">
+  <div class="brand"><img src="../assets/site/hillstate.png" alt="힐스테이트"><span>도안리버파크 단지 내 상가</span></div>
+  <div class="mast-tools"><a href="../">홈페이지</a><button id="logout" class="plain" hidden>로그아웃</button></div>
+</header>
+<main>
+  <section id="gate" class="gate">
+    <form id="login-form" method="post">
+      <h1>관리자 로그인</h1>
+      <label for="account">아이디</label><input id="account" autocomplete="username" required maxlength="60" autocapitalize="none" spellcheck="false">
+      <label for="password">비밀번호</label><input id="password" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">로그인</button>
+      <p class="notice" id="login-message" role="status"></p>
+    </form>
+  </section>
+  <section id="inbox" class="inbox" hidden>
+    <div class="title-row"><h1>상담 문의</h1><button id="refresh">새로고침</button></div>
+    <div id="counts" class="counts" aria-label="상태별 문의 수"></div>
+    <form id="filter" class="filters" role="search">
+      <label>검색<input id="query" type="search" placeholder="이름, 연락처, 단지·동·호실" maxlength="100" autocomplete="off"></label>
+      <label>접수 시작일<input id="from" type="date"></label>
+      <label>접수 종료일<input id="until" type="date"></label>
+      <button type="reset">필터 초기화</button>
+    </form>
+    <div class="list-heading"><div><strong id="result-count"></strong> <span id="updated"></span></div><button id="export" disabled>목록 CSV 저장</button></div>
+    <p id="list-message" role="status" class="notice"></p>
+    <div class="table-box"><table><caption class="sr">접수된 상담 문의 목록</caption><thead><tr><th>접수일</th><th>신청자</th><th>연락처</th><th>관심 호실</th><th>상담 유형</th><th>상태</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <p id="empty" class="empty" hidden></p>
+    <button id="more" hidden>더 보기</button>
+  </section>
+</main>
+<dialog id="detail" aria-labelledby="detail-title">
+  <div class="sheet-head"><div><h2 id="detail-title">상담 문의 상세</h2><p id="received"></p></div><button id="close-detail" aria-label="상담 문의 상세 닫기">닫기</button></div>
+  <div class="sheet-body">
+    <dl class="facts" id="facts"></dl>
+    <div class="field"><h3>신청 내용</h3><p id="request-msg" class="content"></p></div>
+    <div class="field"><label for="status">처리 상태</label><div class="compact"><select id="status"></select><button id="save-status">상태 저장</button></div></div>
+    <div class="field"><label for="memo">상담 메모</label><textarea id="memo" rows="3" maxlength="1000" placeholder="통화 내용이나 다음 연락 일정을 적어 주세요."></textarea><button id="save-memo" class="primary">메모 저장</button></div>
+    <p id="detail-message" role="status" class="notice"></p><div class="danger-zone"><button id="delete" class="danger">문의 삭제</button></div>
+  </div>
+</dialog>
+</body>
+</html>
