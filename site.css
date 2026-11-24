@@ -119,12 +119,6 @@ button[hidden], [hidden] { display: none !important; }
 
 .reference-layout { display: grid; grid-template-columns: minmax(220px,.53fr) 1.47fr; gap: clamp(24px,4.5vw,78px); }
 .leaflet-link { color:var(--wine); text-decoration:underline; text-underline-offset:4px; }
-.premium-list { margin:0 0 2.5rem; scroll-margin-top:90px; }
-.premium-list h3 { font-size:1.35rem; margin:0 0 .8rem; }
-.premium-list dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr)); margin:0; gap:1.25rem; }
-.premium-list dl div { border-top:1px solid var(--line); padding-top:.8rem; }
-.premium-list dt { font-weight:650; }
-.premium-list dd { margin:.35rem 0 0; color:var(--muted); font-size:.92rem; }
 .reference-choices { border-top: 2px solid var(--ink); align-self: start; }
 .ref-choice { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 19px 4px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: white; font-size: clamp(18px,1.55vw,23px); letter-spacing: -.045em; }
 .ref-choice .ico { width: 16px; height: 16px; opacity: .35; }
@@ -302,11 +296,23 @@ dialog::backdrop { background: rgba(20,30,25,.38); }
   .identity-name { padding-left: 7px; }
 }
 
-.hero h1.ratio-heading { display:grid; justify-items:start; gap:clamp(16px,1.5vw,24px); }
+/* 첫 화면: 붉은 띠 + 흰 상자 101:1 (11-24 성준석 부장 요청, 판촉물 띠 디자인 기준) */
+.hero-copy {
+  container-type:inline-size;
+  align-items:stretch;
+  background-color:#a3111c;
+  background-image:
+    linear-gradient(225deg, #7c0a13 0 7%, transparent 7.05%),
+    linear-gradient(225deg, rgba(60,0,6,.16) 0 15%, transparent 15.05%),
+    linear-gradient(45deg, rgba(60,0,6,.14) 0 9%, transparent 9.05%);
+}
+.hero h1.ratio-heading { display:grid; justify-items:stretch; text-align:center; gap:clamp(14px,1.4vw,22px); }
 @font-face { font-family:"Archivo Black"; src:url("assets/site/ratio-figures.woff2") format("woff2"); font-style:normal; font-weight:400; font-display:swap; }
-.hero-copy { container-type:inline-size; }
-.ratio-number { display:block; font-family:"Archivo Black",Arial,sans-serif; font-size:clamp(72px,34cqi,188px); font-weight:400; line-height:.95; letter-spacing:-.075em; color:#fff8ef; white-space:nowrap; }
-.ratio-colon { color:#efb7a1; padding-inline:.025em; }
+.ratio-box { display:block; background:#fff; border:3px solid #e9b8bd; border-radius:12px; padding:.14em .2em .1em; font-size:clamp(72px,26cqi,168px); line-height:1; }
+.ratio-number { display:inline-block; font-family:"Archivo Black",Arial,sans-serif; font-size:1em; font-weight:400; line-height:.95; letter-spacing:-.06em; color:#940c16; white-space:nowrap; }
+.ratio-colon { color:inherit; padding-inline:.025em; }
+.hero .inquiry-hero-actions { justify-content:center; }
+.hero-copy .hero-action { color:#940c16; }
 @media (prefers-reduced-motion:no-preference) {
   .ratio-number { animation:ratio-arrive .5s cubic-bezier(.19,.72,.28,1) both; }
   @keyframes ratio-arrive { from { opacity:.6; transform:translateY(.07em); } to { opacity:1; transform:translateY(0); } }
@@ -314,7 +320,7 @@ dialog::backdrop { background: rgba(20,30,25,.38); }
 @media screen and (prefers-reduced-motion:no-preference) and (forced-colors:none) {
   @supports ((background-clip:text) or (-webkit-background-clip:text)) {
     .ratio-number {
-      background-image:linear-gradient(110deg, #fff8ef 40%, #ffe0a7 45%, #fff 49%, #fff 51%, #ffdfa5 54%, #fff8ef 60%);
+      background-image:linear-gradient(110deg, #940c16 40%, #c8303b 45%, #f27a82 49%, #f27a82 51%, #c8303b 55%, #940c16 60%);
       background-size:300% 100%;
       background-repeat:no-repeat;
       -webkit-background-clip:text;
@@ -328,5 +334,25 @@ dialog::backdrop { background: rgba(20,30,25,.38); }
     }
   }
 }
-.ratio-title { font-size:clamp(27px,2.7vw,46px); line-height:1.2; font-weight:590; letter-spacing:-.05em; }
-.ratio-detail { margin-top:clamp(12px,1.4vw,22px); color:#f3e7ea; font-size:clamp(15px,1.15vw,19px); line-height:1.55; }
+.ratio-title { font-size:clamp(26px,2.6vw,44px); line-height:1.2; font-weight:700; letter-spacing:-.045em; color:#fff; }
+.ratio-detail { margin-top:clamp(14px,1.4vw,22px); color:#fff; font-size:clamp(16px,1.3vw,22px); line-height:1.45; font-weight:600; letter-spacing:-.03em; text-align:center; text-wrap:balance; word-break:keep-all; }
+
+/* 장점 3가지 (프리미엄 4 대체) */
+.strengths { border-bottom:1px solid var(--line); scroll-margin-top:80px; }
+.strength-list { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.strength-list li { padding:clamp(30px,3.4vw,54px) clamp(18px,2.4vw,40px); word-break:keep-all; }
+.strength-list li + li { border-left:1px solid var(--line); }
+.strength-list li:first-child { padding-left:0; }
+.strength-list li:last-child { padding-right:0; }
+.strength-no { display:block; font-size:clamp(26px,2.2vw,36px); font-weight:800; font-variant-numeric:lining-nums; line-height:1; color:#a3111c; margin-bottom:clamp(12px,1.2vw,18px); }
+.strength-list h3 { font-size:clamp(28px,2.6vw,42px); line-height:1.18; font-weight:750; letter-spacing:-.05em; color:var(--ink); }
+.strength-lead { margin-top:clamp(10px,1vw,14px); font-size:clamp(18px,1.45vw,23px); line-height:1.45; font-weight:600; letter-spacing:-.035em; color:var(--ink); }
+.strength-sub { font-size:.78em; font-weight:500; color:var(--muted); margin-left:.25em; white-space:nowrap; }
+.strength-note { margin-top:12px; font-size:14px; line-height:1.55; color:var(--muted); }
+@media (max-width: 800px) {
+  .strength-list { grid-template-columns:1fr; }
+  .strength-list li, .strength-list li:first-child, .strength-list li:last-child { padding:26px 0; }
+  .strength-list li + li { border-left:0; border-top:1px solid var(--line); }
+  .strength-list h3 { font-size:28px; }
+  .strength-lead { font-size:18px; }
+}
